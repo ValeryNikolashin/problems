@@ -15,7 +15,7 @@ public class FindNumberAtPositionBySequenceTemplateValeriyNikolashin
 
         const int maxDigit = 9;
 
-        if (digits.Length < maxDigit)
+        if (digits.Length <= maxDigit)
             return digits[^position];
 
         var lastNumber = digits.Last();
@@ -68,6 +68,54 @@ public class FindNumberAtPositionBySequenceTemplateValeriyNikolashin
         throw new UnreachableException();
     }
 
+    public int FindNumber2(ImmutableArray<int> digits, int position)
+    {
+        if (digits.Length is < 1 or > 99)
+            throw new ArgumentException("Digits count must be between 1 and 99.", nameof(digits));
+        if (digits.Length < position)
+            throw new ArgumentException("Position is more than the count of the digits.", nameof(position));
+
+        const int maxDigit = 9;
+
+        if (digits.Length <= maxDigit)
+            return digits[^position];
+
+        var lastNumber = digits.Last();
+        var lastNumberTens = lastNumber / 10;
+        var lastNumberUnits = lastNumber % 10;
+
+        var currentPosition = 0;
+        var minDigit = lastNumberTens > lastNumberUnits
+            ? lastNumberTens
+            : lastNumberTens + 1;
+
+        for (var i = maxDigit; i >= minDigit; i--)
+        {
+            currentPosition++;
+
+            if (currentPosition == position)
+                return i;
+        }
+
+        for (var i = digits.Length - 1; i > maxDigit - 1; i--)
+        {
+            var currentNumber = digits[i];
+
+            if (currentNumber % 11 == 0)
+            {
+                currentPosition++;
+                if (currentPosition == position)
+                    return currentNumber / 11;
+            }
+
+            currentPosition++;
+            if (currentPosition == position)
+                return currentNumber;
+        }
+
+        throw new UnreachableException();
+    }
+
     [Theory]
     [InlineData(99, 15, 87)]
     [InlineData(99, 28, 75)]
@@ -83,5 +131,6 @@ public class FindNumberAtPositionBySequenceTemplateValeriyNikolashin
         var sequence = Enumerable.Range(1, max).ToImmutableArray();
 
         Assert.Equal(expected, FindNumber(sequence, position));
+        Assert.Equal(expected, FindNumber2(sequence, position));
     }
 }
